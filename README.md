@@ -11,7 +11,7 @@ This Python script fetches new job postings from one or more RSS feeds on Upwork
     - `tgBotToken`: Your Telegram bot token.
     - `chat_id`: The chat ID of the Telegram chat to send notifications to.
     - `feed_url`: A list of URLs for the Upwork RSS feeds to monitor.
-4. Run the script using python `upwork-job-feed-notifier.py`.
+4. Run the script using python `upwork_job_feed_notifier.py`.
 
 ## Configuration
 The `config.json` file contains the following settings:
@@ -63,7 +63,7 @@ The `config.json` file contains the following settings:
 1. Open your terminal and type crontab -e to open the crontab file in your default editor.
 2. Add a new line to the crontab file to specify when you want the script to run. For example, if you want the script to run every hour at minute 50, add the following line:
     ```bash
-    50 * * * * /usr/bin/python3 /path/to/script.py
+    50 * * * * /usr/bin/python3 /path/to/script/upwork_job_feed_notifier.py
     ```
     Replace /path/to/script.py with the actual path to your script file.
 3. Save and close the crontab file.

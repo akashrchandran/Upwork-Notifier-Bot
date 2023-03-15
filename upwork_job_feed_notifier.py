@@ -1,7 +1,9 @@
 import json
 import logging
 import os
+import sqlite3
 from datetime import datetime
+from re import findall
 
 import feedparser
 import requests
@@ -25,22 +27,31 @@ logger.debug('Reading config file')
 with open(configs_file, 'r') as f:
     config = json.load(f)
 
+logger.debug('Creating connection to the SQLite database')
+# Create a connection to the SQLite database
+db_file = os.path.join(script_dir, 'upwork_jobs.db')
+conn = sqlite3.connect(db_file)
+cursor = conn.cursor()
+
+# Create the jobs table if it doesn't exist
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS jobs (
+        job_id TEXT PRIMARY KEY,
+        title TEXT,
+        category TEXT,
+        rate TEXT,
+        summary TEXT,
+        link TEXT,
+        posted_on TEXT,
+        country TEXT,
+        skills TEXT
+    );
+''')
+
 tgBotToken = config['tgBotToken']
 feed_urls = config['feed_url']
 bot_url = f'https://api.telegram.org/bot{tgBotToken}/'
 chat_id = config['chat_id']
-
-# Initialize the list of job IDs that have already been processed
-processed_jobs = []
-
-# Try to load the processed jobs from a file
-logger.debug('Loading processed jobs from file')
-try:
-    with open(processed_jobs_file, 'r') as f:
-        processed_jobs = json.load(f)
-except FileNotFoundError:
-    logger.info(f'{processed_jobs_file} was not found.')
-    pass
 
 # Set your local timezone
 local_tz = tzlocal.get_localzone()
@@ -54,8 +65,9 @@ for feed_url in feed_urls:
     # Loop through the entries in the feed (most recent first)
     for entry in reversed(feed.entries):
         # Check if this job has already been processed
-        job_id = entry.link.split('/')[-1]
-        if job_id in processed_jobs:
+        job_id = findall(r'(?<=_)%([a-zA-Z0-9]+)', entry.link)[0]
+        cursor.execute('SELECT * FROM jobs WHERE job_id = ?', (job_id,))
+        if cursor.fetchone():
             continue
         logger.debug('New job was found')
 
@@ -82,9 +94,13 @@ for feed_url in feed_urls:
         # Get payment type
         budget = soup.find('b', string='Budget')
         hourly_rate = soup.find('b', string='Hourly Range')
-        rate = budget.find_next_sibling(string=True) if budget else hourly_rate.find_next_sibling(string=True)
-        rate = rate.replace(":", "").replace("\n", "").strip()
-        rate = 'Budget ' + rate if budget else ('Hourly ' + rate if hourly_rate else 'N/A')
+        try:
+            rate = budget.find_next_sibling(string=True) if budget else hourly_rate.find_next_sibling(string=True)
+            rate = rate.replace(":", "").replace("\n", "").strip()
+            rate = 'Budget ' + rate if budget else ('Hourly ' + rate if hourly_rate else 'N/A')
+        except Exception as e:
+            logger.debug(f'Rate is not available for {entry.link.strip()}: {e}')
+            rate = 'N/A'
 
         # Get job category
         category = soup.find('b', string='Category').find_next_sibling(string=True).replace(":", "").strip().replace(" ", "_").replace("-", "_").replace("/", "_").replace("&", "and")
@@ -119,9 +135,10 @@ for feed_url in feed_urls:
             logger.error(f"Error sending message to Telegram: {e}")
             continue
         # Add the job ID to the list of processed jobs
-        processed_jobs.append(job_id)
+        logger.debug(f'Saving job {job_id} to db')
+        cursor.execute("INSERT INTO jobs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                       (job_id, entry.title, category, rate, summary, entry.link, entry.published, country, skills))
 
-    # Save the processed jobs to a file
-    with open(processed_jobs_file, 'w') as f:
-        json.dump(processed_jobs, f)
-        logger.debug('Saved processed jobs to a file')
+# Save the processed jobs to db
+conn.commit()
+conn.close()
