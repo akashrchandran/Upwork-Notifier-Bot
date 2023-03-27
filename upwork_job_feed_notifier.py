@@ -109,7 +109,10 @@ for feed_url in feed_urls:
         country = soup.find('b', string='Country').find_next_sibling(string=True).replace(":", "").strip()
 
         # Get required skill and format them as hashtags
-        skills = soup.find('b', string='Skills').find_next_sibling(string=True).replace(":", "").strip()
+        try:
+            skills = soup.find('b', string='Skills').find_next_sibling(string=True).replace(":", "").strip()
+        except Exception as e:
+            skills='N/A'
         skills_hashtags = " ".join(["#" + word.strip().replace(" ", "_").replace("-", "_").replace("/", "_").replace("&", "and") for word in skills.split(", ")[:10]]).strip()
 
         # Get the 1st sentence of the summary
