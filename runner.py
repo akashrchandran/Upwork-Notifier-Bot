@@ -32,7 +32,7 @@ minutes = int(input("Minutes: ") or 0)
 seconds = int(input("Seconds: ") or 0)
 
 # initialize the scheduler
-scheduler = BlockingScheduler()
+scheduler = BlockingScheduler(timezone="asia/kolkata")
 
 # add the job to the scheduler
 scheduler.add_job(cron_process, 'interval', hours=hours, minutes=minutes, seconds=seconds)
