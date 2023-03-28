@@ -58,17 +58,24 @@ The `config.json` file contains the following settings:
     </details>
     </p>
 
+# Setup script to run every interval
 
-##  Set up a cron job to run this script
-1. Open your terminal and type crontab -e to open the crontab file in your default editor.
-2. Add a new line to the crontab file to specify when you want the script to run. For example, if you want the script to run every hour at minute 50, add the following line:
-    ```bash
-    50 * * * * /usr/bin/python3 /path/to/script/upwork_job_feed_notifier.py
-    ```
-    Replace /path/to/script.py with the actual path to your script file.
-3. Save and close the crontab file.
-4. The cron daemon will automatically start the script at the specified time. You can check the system log to verify that the script is running by typing `tail -f /var/log/syslog` in your terminal. If you see a message that says `CRON[xxx]: (username) CMD (/usr/bin/python3 /path/to/script/upwork_job_feed_notifier.py)`, it means the script is running.
+## Use runner.py
 
+> Just run the script using python3 runner.py and it will ask to set the interval. Just type in the values or leave it blank to set it to run every hour.
+
+<details>
+    <summary>Old Method</summary>
+    <h2>Set up a cron job to run this script</h2>
+    1. Open your terminal and type crontab -e to open the crontab file in your default editor.
+    2. Add a new line to the crontab file to specify when you want the script to run. For example, if you want the script to run every hour at minute 50, add the following line:
+        ```bash
+        50 * * * * /usr/bin/python3 /path/to/script/upwork_job_feed_notifier.py
+        ```
+        Replace /path/to/script.py with the actual path to your script file.
+    3. Save and close the crontab file.
+    4. The cron daemon will automatically start the script at the specified time. You can check the system log to verify that the script is running by typing `tail -f /var/log/syslog` in your terminal. If you see a message that says `CRON[xxx]: (username) CMD (/usr/bin/python3 /path/to/script/upwork_job_feed_notifier.py)`, it means the script is running.
+</details>
 
 ## Screenshot of the notifiacation
 ![Telegram message](message_example.png)
