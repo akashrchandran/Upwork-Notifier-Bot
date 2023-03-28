@@ -97,7 +97,13 @@ for feed_url in feed_urls:
         try:
             rate = budget.find_next_sibling(string=True) if budget else hourly_rate.find_next_sibling(string=True)
             rate = rate.replace(":", "").replace("\n", "").strip()
-            rate = 'Budget ' + rate if budget else ('Hourly ' + rate if hourly_rate else 'N/A')
+            rate = (
+                f'Budget {rate}'
+                if budget
+                else f'Hourly {rate}'
+                if hourly_rate
+                else 'N/A'
+            )
         except Exception as e:
             logger.debug(f'Rate is not available for {entry.link.strip()}: {e}')
             rate = 'N/A'
@@ -113,8 +119,10 @@ for feed_url in feed_urls:
             skills = soup.find('b', string='Skills').find_next_sibling(string=True).replace(":", "").strip()
         except Exception as e:
             skills='N/A'
-        skills_hashtags = " ".join(["#" + word.strip().replace(" ", "_").replace("-", "_").replace("/", "_").replace("&", "and") for word in skills.split(", ")[:10]]).strip()
-
+        try:
+            skills_hashtags = " ".join(["#" + word.strip().replace(" ", "_").replace("-", "_").replace("/", "_").replace("&", "and") for word in skills.split(", ")[:10]]).strip()
+        except Exception as e:
+            skills_hashtags = "N/A"
         # Get the 1st sentence of the summary
         summary = (entry.summary.split('.')[0] + ".").replace("<br>", "\n").replace("<br/>", "\n").replace("<br />", "\n").replace("<br >", "\n").replace('\n\n', '\n')
 

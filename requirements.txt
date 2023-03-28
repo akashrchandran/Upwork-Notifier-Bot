@@ -2,3 +2,4 @@ bs4
 feedparser
 requests
 tzlocal==4.2
+APScheduler
