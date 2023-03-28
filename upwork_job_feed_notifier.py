@@ -112,8 +112,10 @@ for feed_url in feed_urls:
         category = soup.find('b', string='Category').find_next_sibling(string=True).replace(":", "").strip().replace(" ", "_").replace("-", "_").replace("/", "_").replace("&", "and")
 
         # Get customer country
-        country = soup.find('b', string='Country').find_next_sibling(string=True).replace(":", "").strip()
-
+        try:
+            country = soup.find('b', string='Country').find_next_sibling(string=True).replace(":", "").strip()
+        except Exception as e:
+            country='N/A'
         # Get required skill and format them as hashtags
         try:
             skills = soup.find('b', string='Skills').find_next_sibling(string=True).replace(":", "").strip()
