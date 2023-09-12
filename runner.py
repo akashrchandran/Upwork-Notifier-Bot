@@ -2,6 +2,7 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
 import subprocess
 import sys
+import os
 
 python_command = sys.executable
 script_to_run = "upwork_job_feed_notifier.py"
@@ -9,7 +10,8 @@ script_to_run = "upwork_job_feed_notifier.py"
 
 # function to invoke the main script
 def cron_process():
-    subprocess.Popen([python_command, script_to_run], shell=True)
+    print("checking for new notifications...")
+    subprocess.Popen([python_command, script_to_run])
 
 
 logo = """
@@ -25,8 +27,13 @@ ooooo     ooo                                                oooo
                                                             ~ Notifier                             
 """
 print(logo, end="\n\n")
+
+if not os.path.exists("config.json"):
+    print("Config File Not Found, Please read README.MD")
+    exit()
 print("Enter the invterval to run the script: ")
 print("Leave blank to run the script every hour")
+
 
 # if user leave it blank assgin 1 to hours
 hours = int(input("Hours: ") or 1)
