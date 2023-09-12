@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 from apscheduler.schedulers.blocking import BlockingScheduler
 import subprocess
+import sys
+
+python_command = sys.executable
+script_to_run = "upwork_job_feed_notifier.py"
+
 
 # function to invoke the main script
 def cron_process():
-    subprocess.Popen("python3 upwork_job_feed_notifier.py", shell=True)
+    subprocess.Popen([python_command, script_to_run], shell=True)
 
 
-logo = \
-'''
+logo = """
 ooooo     ooo                                                oooo        
 `888'     `8'                                                `888        
  888       8  oo.ooooo.  oooo oooo    ooo  .ooooo.  oooo d8b  888  oooo  
@@ -19,7 +23,7 @@ ooooo     ooo                                                oooo
                888                                                       
               o888o                                                      
                                                             ~ Notifier                             
-'''
+"""
 print(logo, end="\n\n")
 print("Enter the invterval to run the script: ")
 print("Leave blank to run the script every hour")
@@ -35,7 +39,9 @@ seconds = int(input("Seconds: ") or 0)
 scheduler = BlockingScheduler(timezone="asia/kolkata")
 
 # add the job to the scheduler
-scheduler.add_job(cron_process, 'interval', hours=hours, minutes=minutes, seconds=seconds)
+scheduler.add_job(
+    cron_process, "interval", hours=hours, minutes=minutes, seconds=seconds
+)
 
 # start the scheduler
 scheduler.start()
